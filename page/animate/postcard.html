@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>postcard</title>
+
+    <style>
+        .container{
+            position: absolute;
+            width: 262px;
+            height: 176px;
+            left: 0;  right:0; top:0; bottom: 0;
+            margin: auto;
+            display: block;
+        }
+        .postcard{
+            position: relative;
+            width: 262px;
+            height: 176px;
+        }
+        .postcard img{
+            width: 262px;
+            height: 176px;
+            position: absolute;
+            transition: all 0.3s;
+        }
+        .postcard span{
+            width: inherit;
+            height: inherit;
+            position: absolute;
+            border: 1px solid #e0e0e0 ;
+            transition: all 0.3s;
+            background-color: #ffffff;
+        }
+        .postcard span:hover,.postcard img{
+            cursor: pointer;
+        }
+        .postcard span:nth-child(4){  left: 0px;  top: 0px;  }
+        .postcard span:nth-child(3){  left: 2px;  top: 2px;  }
+        .postcard span:nth-child(2){  left: 4px;  top: 4px;  }
+        .postcard span:nth-child(1){  left: 6px;  top: 6px;  }
+
+        .postcard:hover img{  transform: rotate(-1deg);  }
+        .postcard:hover span:nth-child(4){  transform: rotate(-4deg);  }
+        .postcard:hover span:nth-child(3){  transform: rotate(-1deg);  }
+        .postcard:hover span:nth-child(2){  transform: rotate(2deg);  }
+        .postcard:hover span:nth-child(1){  transform: rotate(5deg);  }
+
+    </style>
+</head>
+<body>
+<!--来源于www.lofter.com/art/postcard 明信片展示动画-->
+
+<div class="container">
+    <section class="postcard">
+        <span class=".bor"></span>
+        <span class=".bor"></span>
+        <span class=".bor"></span>
+        <span class=".bor"></span>
+        <img src="../../material/img/postcard.jpg">
+    </section>
+</div>
+</body>
+</html>

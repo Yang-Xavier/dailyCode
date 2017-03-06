@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+//    var $ =function(num){
+//        var _num=new Number(num);
+//        return _num
+function fn(a,b,c){
+    var result=a+b+c
+    return result
+}
+
+function currying(fn) {
+    var slice = Array.prototype.slice,
+        __args = slice.call(arguments, 1);
+    return function () {
+        var __inargs = slice.call(arguments);
+        return fn.apply(null,__args.concat(__inargs));
+    };
+}
+
+function currying_(fn){
+    return function (a){
+        return function(b){
+            return function(c){
+                return fn(a,b,c)
+            }
+        }
+    }
+}
+
+
+console.log(currying_(fn)(1)(2)(3));
+//console.log(fn.apply(null,[1])(2,3))
+</script>
+</body>
+</html>

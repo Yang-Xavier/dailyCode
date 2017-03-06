@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bounce</title>
+    <style>
+        canvas{
+            border-bottom: 1px solid black;
+            box-shadow: 0 19px 500px #a1a156;
+        }
+    </style>
+</head>
+<body style="width:100%;background-color:#777777;padding: 0;margin: 0;left: 0;top: 0;">
+<canvas id="cvs" width="1000px" height="500px" >
+
+</canvas>
+
+<script>
+    var cvsWidth=1000,cvsHigh=500;
+    var ctx;
+    var G=0.1,test=true;
+    window.onload=function(){
+        var clientWidth=document.body.clientWidth;
+        cvsWidth=clientWidth;
+        document.getElementById('cvs').setAttribute('width',cvsWidth+'')
+        ctx=document.getElementById('cvs').getContext('2d');
+        run();
+    }
+
+    class Circle{
+
+        constructor(startx,starty,r,speed,forward,color){
+            this.speed=speed;
+            this.startx=startx;
+            this.starty=starty;
+            this._speedx=Math.floor((this.speed*Math.cos(Math.PI*forward/180)));
+            this._speedy=Math.floor((this.speed*Math.sin(Math.PI*forward/180)));
+            this.color=color||"red";
+            this.speedx=this._speedx;
+            this.speedy=this._speedy;
+            this.forwardy=true;//下
+            this.x=startx;
+            this.y=starty;
+            this.r=r;
+            this.isStop=false;
+            this.maxBounce=1;
+            this.animationID=null;
+        }
+
+        move(){
+            ctx.clearRect(0,0,cvsWidth,cvsHigh)
+            if((this.speedy+G)*(this.speedy)<0){this.forwardy=true;test=true}
+            this.x+=this.speedx;
+            this.y+=this.speedy;
+            this.speedy+=G;
+            this.hitTest();
+            if(this.isStop) cancelAnimationFrame(this.animationID);
+            else this.animationID=requestAnimationFrame(this.move.bind(this))
+        }
+
+        hitTest(){
+            if(this.y>=cvsHigh-this.r-3){
+                if(this.forwardy&&test){
+                    test=!test;
+                    if(Math.floor(this.speedy)==0){
+                        this.y=cvsHigh-this.r-3;
+                    }else{
+                        this.calTrans(this.speedy);
+                    }
+                }
+
+                if((cvsHigh-this.y)<this.maxBounce){
+                    this.speedy=-(this.speedy*8/9);
+                    this.forwardy=!this.forwardy;
+                }else{
+                    var dth=Math.abs(this.y-cvsHigh+3);
+                    var endDeg=Math.PI/2-Math.acos(dth/this.r);
+                    var startDeg=Math.PI-endDeg;
+                    this.draw(startDeg,endDeg);
+                }
+            }else {
+                this.draw(Math.PI/2,2*Math.PI+Math.PI/2);
+            }
+        }
+
+        calTrans(v){
+            var s=v*5;
+            if(s>this.r){
+                s=0
+            }else if(s<5){
+                this.isStop=true;
+            }else {
+                s=this.r-s;
+            }
+            console.log(v,s);
+            this.maxBounce=s;
+        }
+
+        draw(startDeg,endDeg){
+
+            var _x=this.r*Math.cos(endDeg);
+            var _y=this.r*Math.sin(endDeg);
+
+            ctx.beginPath();
+            ctx.fillStyle=this.color;
+            ctx.strokeStyle="white";
+            ctx.lineWidth=3;
+            ctx.arc(this.x,this.y,this.r,startDeg,endDeg);
+            ctx.fill();
+            startDeg&&ctx.moveTo(this.x+_x,this.y+_y);
+            startDeg&&ctx.lineTo(this.x-_x,this.y+_y);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+    }
+
+    function run(){
+        var circle1=new Circle(100,50,50,1,90,"blue");
+        circle1.move();
+
+    }
+
+
+
+
+</script>
+
+</body>
+</html>

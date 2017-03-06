@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>circle_move</title>
+
+    <style>
+        .container{
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            left: 0;  right:0; top:0; bottom: 0;
+            margin: auto;
+            display: block;
+        }
+        .circle{
+            display: block;
+            width: inherit;
+            height: inherit;
+            border: inset 5px black;
+            border-radius: 200px;
+            position: relative;
+            /*animation: move 1s infinite;*/
+        }
+        .move{
+            position: absolute;
+            left: 20px;
+            top:20px;
+            width: 50px;
+            height: 50px;
+            background-color: black;
+            border-radius: 50px;
+        }
+        @keyframes move {
+            from{
+                transform: rotate(0deg);
+            }10%{
+                transform: rotate(36deg);
+            }20%{
+                transform: rotate(72deg);
+            }30%{
+                transform: rotate(108deg);
+            }40%{
+                transform: rotate(144deg);
+            }50%{
+                transform: rotate(180deg);
+            }60%{
+                transform: rotate(216deg);
+            }70%{
+                transform: rotate(252deg);
+            }80%{
+                transform: rotate(298deg);
+            }90%{
+                transform: rotate(334deg);
+            }to{
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+<!--css和js分别模拟圆形路径运动-->
+<div class="container">
+    <section class="circle">
+        <section class="move"></section>
+    </section>
+    <script>
+        var speed;
+        var x0=150,y0=150,r=150;
+
+        function move(angle){
+
+        }
+    </script>
+</div>
+</body>
+</html>

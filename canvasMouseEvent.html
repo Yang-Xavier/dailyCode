@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Mouse Event</title>
+    <style>
+        canvas{
+            border: 1px solid black;
+            /*border-bottom: 1px solid black;*/
+            /*box-shadow: 0 19px 500px #a1a156;*/
+        }
+    </style>
+</head>
+<body style="width:100%;padding: 0;margin: 0;left: 0;top: 0;background-color: #FFFFFF">
+<canvas id="cvs" width="1000px" height="500px" >
+
+</canvas>
+<script>
+    var cvsWidth=1000,cvsHigh=600;
+    var ctx,cvs;
+    window.onload=function(){
+        var clientWidth=document.body.clientWidth;
+        cvs=document.getElementById('cvs');
+        cvsWidth=clientWidth;
+        cvs.setAttribute('width',cvsWidth+'')
+        cvs.setAttribute('height',cvsHigh+'')
+
+        ctx=cvs.getContext('2d');
+
+        run();
+    }
+    class Circle{
+        constructor(x,y,r){
+            this.x=x;
+            this.y=y;
+            this.r=r;
+            this.hover=false;
+            this.isClick=false;
+        }
+
+        draw(){
+            ctx.beginPath();
+            ctx.fillStyle='blue';
+            ctx.arc(this.x,this.y,this.r,0,2*Math.PI);
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        test(ex,ey){
+            this.draw()
+            return ctx.isPointInPath(ex,ey);
+        }
+
+        transition(dt){
+            var i=0;
+            var r=this.r;
+            var self=this;
+            var id=setInterval(function(){
+                if(i>=dt){
+                    clearInterval(id);
+                }
+                self.drawTransition(r+i,1-i/dt);
+                i+=5;
+            },50)
+        }
+
+        drawTransition(r,o){
+            ctx.clearRect(0,0,cvsWidth,cvsHigh);
+            ctx.beginPath();
+            ctx.fillStyle='rgba(220,220,220,'+o+')';
+            ctx.arc(this.x,this.y,r,0,2*Math.PI);
+            ctx.fill();
+            ctx.closePath();
+            repaint();
+        }
+
+    }
+
+    var c1,c2;
+    function run(){
+        c1=new Circle(100,100,50);
+        c1.draw();
+        c2=new Circle(300,300,50);
+        c2.draw();
+
+        var down_x=0,down_y=0;
+
+        cvs.addEventListener('mousemove',function(e){
+            if(!c1.isClick&&!c2.isClick){
+                if(c1.test(e.layerX,e.layerY)){
+                    if(!c1.hover){
+                        c1.transition(50);
+                        c1.hover=true;
+                    }
+
+                }else{
+                    c1.hover=false;
+                }
+                if(c2.test(e.layerX,e.layerY)){
+                    if(!c2.hover){
+                        c2.transition(50);
+                        c2.hover=true;
+                    }
+
+                }else{
+                    c2.hover=false;
+                }
+            }
+            else if(c1.isClick){
+                ctx.clearRect(0,0,cvsWidth,cvsHigh);
+                c1.x+=e.layerX-down_x;
+                c1.y+=e.layerY-down_y;
+                down_x=e.layerX;
+                down_y=e.layerY;
+                repaint();
+            }else if(c2.isClick){
+                ctx.clearRect(0,0,cvsWidth,cvsHigh);
+                c2.x+=e.layerX-down_x;
+                c2.y+=e.layerY-down_y;
+                down_x=e.layerX;
+                down_y=e.layerY;
+                repaint();
+            }
+
+        })
+
+        cvs.addEventListener('mousedown',function(e){
+            down_x=e.layerX;
+            down_y=e.layerY;
+            if(c1.test(e.layerX,e.layerY)){
+                c1.isClick=true;
+            }
+            if(c2.test(e.layerX,e.layerY)){
+                c2.isClick=true;
+            }
+
+        })
+
+        cvs.addEventListener('mouseup',function(e){
+                c1.isClick=false;
+                c2.isClick=false;
+        })
+
+    }
+
+    function repaint(){
+        c1.draw();
+        c2.draw();
+    }
+
+
+
+</script>
+</body>
+</html>

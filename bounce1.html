@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bounce</title>
+    <style>
+        canvas{
+            box-shadow: 0 19px 500px #a1a156;
+        }
+    </style>
+</head>
+<body style="width:100%;background-color:#dcdcdc;padding: 0;margin: 0;left: 0;top: 0;">
+<canvas id="cvs" width="1000px" height="500px" >
+
+</canvas>
+<script>
+    var cvsWidth=1000,cvsHigh=500;
+    window.onload=function(){
+        var clientWidth=document.body.clientWidth;
+        cvsWidth=clientWidth;
+        document.getElementById('cvs').setAttribute('width',cvsWidth+'')
+    }
+    var G=1,FA=1;
+    var ctx=document.getElementById('cvs').getContext('2d');
+    var circle=function(startx,starty,r,speed,forward,color){
+        this.speed=speed;
+        this.startx=startx;
+        this.starty=starty;
+        this._speedx=Math.floor((this.speed*Math.cos(Math.PI*forward/180)));
+        this._speedy=Math.floor((this.speed*Math.sin(Math.PI*forward/180)));
+        this.color=color||"red";
+        this.speedx=this._speedx;
+        this.speedy=this._speedy;
+        this.x=startx;
+        this.y=starty;
+        this.r=r;
+        this.isStop=false;
+        this.forwardx=this.speedx==0?0
+            : forward>-90&&forward<90 ? 1
+            : -1;
+        //默认运动方向水平向右 -1向左 0不动 1向右
+//        this.forwardy=forward>0&&forward<180;//默认运动方向水平向右 false向上 true向下
+    }
+    circle.prototype={
+        draw:function(){
+            ctx.beginPath();
+            ctx.fillStyle=this.color;
+            ctx.arc(this.x,this.y,this.r,0,Math.PI*2)
+            ctx.fill();
+            ctx.closePath();
+        },
+        move:function(){
+            this.x+=this.speedx;
+            this.y+=this.speedy;
+            this.hitTest();
+            this.draw();
+        },
+        hitTest:function(){
+            if(this.x>=cvsWidth-this.r){
+                this.speedx=-(this.speedx/2);
+                this.x=cvsWidth-this.r;
+                this.forwardx=-this.forwardx;
+            }
+            if(this.y>=cvsHigh-this.r){
+                this.speedy=-(this.speedy/4*3);
+                this.y=cvsHigh-this.r;
+            }
+            if(this.x<=this.r){
+                this.speedx=-this.speedx;
+                this.x=this.r;
+                this.forwardx=-this.forwardx;
+            }
+            if(this.y<=this.r){
+                this.speedy=-this.speedy;
+                this.y=this.r;
+            }
+
+            this.speedCal(G)
+        },
+        speedCal:function(asy,asx){
+            if(!this.isStop){
+                var asx=asx||0;
+                this.speedy+=asy;
+                this.speedx+=this.forwardx*asx;
+                if(Math.abs(this.speedx)<=(this._speedx/2)){
+                    this.restart();
+                }
+            }
+        },
+        stop:function(){
+            this.speedx=0;
+            this.speedy=0;
+            this.isStop=true;
+        },
+        restart:function(){
+            var speed=this._random(1,10,false)
+            var forward=this._random(-60,60);
+            this.color=this._randomColor();
+            this.speedx=Math.floor((speed*Math.cos(Math.PI*forward/180)));
+            this.speedy=Math.floor((speed*Math.sin(Math.PI*forward/180)));
+            this.x=this.startx;
+            this.y=this.starty;
+        },
+        _random:function(s,e,o){
+            if(!o){
+                return Math.random()*(e-s)+s
+            }else {
+                var r=0;
+                while((r=Math.random()*(e-s)==0)){}
+                return r+s
+            }
+        },
+        _randomColor:function(){
+            return 'rgb('+Math.floor(this._random(0,225))+','+Math.floor(this._random(0,225))+','+Math.floor(this._random(0,225))+')'
+        },
+    }
+
+    var circleController=function(num){
+        this.circleNum=num;
+        this.circles=[];
+    }
+
+    circleController.prototype={
+        init:function(){
+            for(let i=0;i<this.circleNum;i++){
+                this.circles[i] = new circle(
+                    this._random(50,60),
+                    this._random(50,60),
+                    this._random(10,15),
+                    this._random(1,10,false),
+                    this._random(-60,60),
+                    this._randomColor()
+                )
+            }
+        },
+        _random:function(s,e,o){
+            if(!o){
+                return Math.random()*(e-s)+s
+            }else {
+                var r=0;
+                while((r=Math.random()*(e-s)==0)){}
+                return r+s
+            }
+        },
+        _randomColor:function(){
+            return 'rgb('+Math.floor(this._random(0,225))+','+Math.floor(this._random(0,225))+','+Math.floor(this._random(0,225))+')'
+        },
+        animate:function(){
+            ctx.clearRect(0,0,cvsWidth,cvsHigh);
+            for(let i=0;i<this.circleNum;i++){
+                this.circles[i].move()
+            }
+            requestAnimationFrame(this.animate.bind(this))
+        }
+    }
+
+    var circleCtlr=new circleController(100);
+    circleCtlr.init();
+    circleCtlr.animate();
+</script>
+</body>
+</html>

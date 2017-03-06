@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>print</title>
+
+    <style>
+        .container{
+            position: absolute;
+            width: 262px;
+            height: 262px;
+            left: 0;  right:0; top:0; bottom: 0;
+            margin: auto;
+            display: block;
+        }
+        .print{
+            width: 262px;
+            height: 262px;
+            overflow: hidden;
+            position: relative;
+            display: block;
+        }
+        .print img{
+            position: absolute;
+            width:393px;
+            height: 262px;
+            left: 50%;
+            margin-left: calc( 393px / -2) ;
+            transition: all 0.8s ;
+        }
+        .print section{
+            position: absolute;
+            z-index: 100;
+            width: 242px;
+            height: calc( 262px / 3 * 2);
+            left: 0;  right:0; top:0; bottom: 0;
+            margin: auto;
+            border: inset 10px black;
+            opacity: 0;
+            transition: all 0.2s 0.1s;
+        }
+        .print:hover img{
+            transform: scale(0.4);
+        }
+        .print:hover{
+            cursor: pointer;
+        }
+        .print:hover section{
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+<!--来源于www.lofter.com/art/print 画框展示动画-->
+
+<div class="container">
+    <section class="print">
+        <section ></section>
+        <img src="../../material/img/print.jpeg">
+    </section>
+</div>
+</body>
+</html>
