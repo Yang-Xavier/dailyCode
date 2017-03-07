@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Circle</title>
+    <style>
+        canvas{
+            border: 1px solid black;
+            /*border-bottom: 1px solid black;*/
+            /*box-shadow: 0 19px 500px #a1a156;*/
+        }
+    </style>
+</head>
+<body style="width:100%;padding: 0;margin: 0;left: 0;top: 0;background-color: #444444">
+<canvas id="cvs" width="1000px" height="500px" >
+
+</canvas>
+<script>
+    var cvsWidth=1000,cvsHigh=600;
+    var ctx,cvs;
+    window.onload=function(){
+            var clientWidth=document.body.clientWidth;
+            var clientHeight=window.screen.height||document.body.clientHeight;
+            cvs=document.getElementById('cvs');
+            cvsWidth=clientWidth;
+            cvsHigh=clientHeight;
+            cvs.setAttribute('width',cvsWidth+'')
+            cvs.setAttribute('height',cvsHigh+'')
+
+            ctx=cvs.getContext('2d');
+
+            run();
+    }
+
+    class Circle{
+        constructor(x,y,r,speed,forward,color){
+            this.x=x;
+            this.y=y;
+            this.r=r;
+            this.color=color;
+            this.opcity=parseFloat(color.substr(color.lastIndexOf(',')+1,color.lastIndexOf(")")-1));
+            this.speedx=Math.floor((speed*Math.cos(Math.PI*forward/180)));
+            this.speedy=Math.floor((speed*Math.sin(Math.PI*forward/180)));
+        }
+
+        draw(){
+            var rgba=this.color.replace(/[0-9]\.[0-9]+\)/,this.opcity+')')
+            ctx.beginPath();
+            ctx.fillStyle=rgba;
+            ctx.arc(this.x,this.y,this.r,0,2*Math.PI);
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        move(){
+            this.x+=this.speedx;
+            this.y+=this.speedy;
+            this.hitDetect();
+        }
+
+        hitDetect(){
+            if(this.x>=cvsWidth-this.r){
+                this.speedx=-(this.speedx/2);
+                this.x=cvsWidth-this.r;
+            }if(this.x<=this.r){
+                this.x=this.r
+            }
+            if(this.y>=cvsHigh-this.r){
+                this.speedy=-(this.speedy/4*3);
+                this.y=cvsHigh-this.r;
+            }if(this.y<=this.r){
+                this.y=this.r
+            }
+        }
+
+    }
+
+    class Controller{
+        constructor(){
+            this.circles=[];
+            this.isMouseDown=false;
+        }
+
+        addCircle(circle){
+            this.circles.push(circle)
+        }
+
+        delCircle(index){
+            this.circles.splice(index,1);
+        }
+
+        draw(){
+            var del=[];
+            this.circles.length!=0
+            &&this.circles.forEach((circle,index)=>{
+                circle.draw();
+                if(circle.opcity<=0){
+                    del.push(index);
+                }
+            })
+            return del;
+        }
+
+        check(del){
+            if(del.length!=0){
+                del.forEach((index)=>{
+                    this.delCircle(index);
+                })
+            }
+        }
+
+
+        move(max_r,dt_r,g,fade){
+            var self=this;
+            return function(){
+                ctx.clearRect(0,0,cvsWidth,cvsHigh);
+                self.check(self.draw());
+                self.circles.forEach((circle)=>{
+                    circle.speedy+=g;
+                    circle.r<=max_r&&(circle.r+=dt_r);//半径扩大
+                    circle.opcity-=fade;
+                    circle.move();
+                })
+            }
+
+        }
+
+        run(){
+            return this.move(30,3,1,0.05)
+
+        }
+
+    }
+
+
+
+    function run(){
+        var circleCtrl=new Controller();
+        var rgba="";
+        setInterval(circleCtrl.run(),100);
+        cvs.addEventListener('mousedown',function(e){
+            circleCtrl.isMouseDown=true;
+//            setInterval(function(){
+//                rgba="rgba("+Math.floor(random(0,225))+","+Math.floor(random(0,225))+","+Math.floor(random(0,225))+",0.99)";
+//                circleCtrl.addCircle(new Circle(e.layerX,e.layerY,random(1,10),random(1,10),random(-180,180),rgba));
+//            },10)
+
+        })
+        cvs.addEventListener('mousemove',function(e){
+            if(circleCtrl.isMouseDown){
+                rgba="rgba("+Math.floor(random(0,225))+","+Math.floor(random(0,225))+","+Math.floor(random(0,225))+",0.99)";
+                circleCtrl.addCircle(new Circle(e.layerX,e.layerY,random(1,10),random(1,10),random(-180,180),rgba));
+            }
+
+        })
+        cvs.addEventListener('mouseup',function(e){
+            circleCtrl.isMouseDown=false;
+        })
+        cvs.addEventListener('mouseout',function(e){
+            circleCtrl.isMouseDown=false;
+        })
+
+    }
+
+    function random(a,b) {
+        return Math.random()*(b-a)+a;
+    }
+
+</script>
+
+
+</body>
+</html>

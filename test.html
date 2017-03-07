@@ -5,37 +5,39 @@
     <title>Title</title>
 </head>
 <body>
+<canvas id="cvs" width="1000px" height="500px" >
+
+</canvas>
 <script>
-//    var $ =function(num){
-//        var _num=new Number(num);
-//        return _num
-function fn(a,b,c){
-    var result=a+b+c
-    return result
-}
+    cvs=document.getElementById('cvs');
+    ctx=cvs.getContext('2d');
+    ctx.beginPath();
+    ctx.fillStyle='rgba(22,53,128,0.1)';
+    ctx.arc(100,100,50,0,2*Math.PI);
+    ctx.fill();
+    ctx.closePath();
 
-function currying(fn) {
-    var slice = Array.prototype.slice,
-        __args = slice.call(arguments, 1);
-    return function () {
-        var __inargs = slice.call(arguments);
-        return fn.apply(null,__args.concat(__inargs));
-    };
-}
-
-function currying_(fn){
-    return function (a){
-        return function(b){
-            return function(c){
-                return fn(a,b,c)
-            }
+    function drawStar(context, r, x, y) {
+        context.lineWidth = 5;
+        context.beginPath();
+        var dit = Math.PI * 4 / 5;
+        var sin = Math.sin(0) * r + y;
+        var cos = Math.cos(0) * r + x;
+        console.log(0+":"+0);
+        context.moveTo(cos, sin);
+        for (var i = 0; i < 5; i++) {
+            var tempDit = dit * i;
+            sin = Math.sin(tempDit) * r + y;
+            cos = Math.cos(tempDit) * r + x;
+            context.lineTo(cos, sin);
+            console.log(sin+":"+sin+":"+tempDit);
         }
+        context.closePath();
+        context.strokeStyle = "red";
+        context.fillStyle = "#DDDDDD";
+        context.fill();
     }
-}
-
-
-console.log(currying_(fn)(1)(2)(3));
-//console.log(fn.apply(null,[1])(2,3))
+    drawStar(ctx,50,300,300)
 </script>
 </body>
 </html>
