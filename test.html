@@ -17,27 +17,27 @@
     ctx.fill();
     ctx.closePath();
 
-    function drawStar(context, r, x, y) {
-        context.lineWidth = 5;
-        context.beginPath();
+    function drawStar ( r, x, y) {
+        ctx.lineWidth = 5;
+        ctx.beginPath();
         var dit = Math.PI * 4 / 5;
         var sin = Math.sin(0) * r + y;
         var cos = Math.cos(0) * r + x;
         console.log(0+":"+0);
-        context.moveTo(cos, sin);
+        ctx.moveTo(cos, sin);
         for (var i = 0; i < 5; i++) {
             var tempDit = dit * i;
             sin = Math.sin(tempDit) * r + y;
             cos = Math.cos(tempDit) * r + x;
-            context.lineTo(cos, sin);
+            ctx.lineTo(cos, sin);
             console.log(sin+":"+sin+":"+tempDit);
         }
-        context.closePath();
-        context.strokeStyle = "red";
-        context.fillStyle = "#DDDDDD";
-        context.fill();
+        ctx.closePath();
+        ctx.strokeStyle = "red";
+        ctx.fillStyle = "#DDDDDD";
+        ctx.fill();
     }
-    drawStar(ctx,50,300,300)
+    drawStar(50,300,300)
 </script>
 </body>
 </html>

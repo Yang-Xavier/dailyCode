@@ -5,7 +5,7 @@
     <title>Add Circle</title>
     <style>
         canvas{
-            border: 1px solid black;
+            /*border: 1px solid black;*/
             /*border-bottom: 1px solid black;*/
             /*box-shadow: 0 19px 500px #a1a156;*/
         }
@@ -52,6 +52,25 @@
             ctx.closePath();
         }
 
+        drawStart(){
+            var rgba=this.color.replace(/[0-9]\.[0-9]+\)/,this.opcity+')')
+            ctx.beginPath();
+            var dit = Math.PI * 4 / 5;
+            var sin = Math.sin(0) *this. r + this.y;
+            var cos = Math.cos(0) * this.r + this.x;
+            ctx.moveTo(cos, sin);
+            for (var i = 0; i < 5; i++) {
+                var tempDit = dit * i;
+                sin = Math.sin(tempDit) * this.r + this.y;
+                cos = Math.cos(tempDit) * this.r + this.x;
+                ctx.lineTo(cos, sin);
+                console.log(sin+":"+sin+":"+tempDit);
+            }
+            ctx.closePath();
+            ctx.fillStyle = rgba;
+            ctx.fill();
+        }
+
         move(){
             this.x+=this.speedx;
             this.y+=this.speedy;
@@ -94,6 +113,7 @@
             this.circles.length!=0
             &&this.circles.forEach((circle,index)=>{
                 circle.draw();
+//                circle.drawStart();
                 if(circle.opcity<=0){
                     del.push(index);
                 }
@@ -114,6 +134,7 @@
             var self=this;
             return function(){
                 ctx.clearRect(0,0,cvsWidth,cvsHigh);
+
                 self.check(self.draw());
                 self.circles.forEach((circle)=>{
                     circle.speedy+=g;
@@ -126,18 +147,25 @@
         }
 
         run(){
-            return this.move(30,3,1,0.05)
+            return this.move(30,2,1,0.04)
 
         }
 
     }
 
 
+    function animate(a){
+        return function rea(){
+            a&&a();
+            requestAnimationFrame(rea);
+        }
+    }
 
     function run(){
         var circleCtrl=new Controller();
         var rgba="";
-        setInterval(circleCtrl.run(),100);
+//        setInterval(circleCtrl.run(),100);//画图
+        animate(circleCtrl.run())();
         cvs.addEventListener('mousedown',function(e){
             circleCtrl.isMouseDown=true;
 //            setInterval(function(){
@@ -149,7 +177,7 @@
         cvs.addEventListener('mousemove',function(e){
             if(circleCtrl.isMouseDown){
                 rgba="rgba("+Math.floor(random(0,225))+","+Math.floor(random(0,225))+","+Math.floor(random(0,225))+",0.99)";
-                circleCtrl.addCircle(new Circle(e.layerX,e.layerY,random(1,10),random(1,10),random(-180,180),rgba));
+                circleCtrl.addCircle(new Circle(e.layerX,e.layerY,random(1,1),random(1,10),random(-180,180),rgba));
             }
 
         })
