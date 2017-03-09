@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cutter</title>
+    <style>
+        canvas{
+            /*border: 1px solid black;*/
+            /*border-bottom: 1px solid black;*/
+            /*box-shadow: 0 19px 500px #a1a156;*/
+        }
+    </style>
+</head>
+<body style="width:100%;padding: 0;margin: 0;left: 0;top: 0;background-color: #444444">
+<canvas id="cvs" width="1000px" height="500px" >
+
+</canvas>
+<script>
+    var cvsWidth=1000,cvsHigh=600;
+    var ctx,cvs;
+    window.onload=function(){
+            var clientWidth=document.body.clientWidth;
+            var clientHeight=window.screen.height||document.body.clientHeight;
+            cvs=document.getElementById('cvs');
+            cvsWidth=clientWidth;
+            cvsHigh=clientHeight;
+            cvs.setAttribute('width',cvsWidth+'')
+            cvs.setAttribute('height',cvsHigh+'')
+
+            ctx=cvs.getContext('2d');
+
+            run();
+        }
+
+
+        class Rect{
+            constructor(x,y,width,height,color){
+                this.x=x;
+                this.y=y;
+                this.width=width;
+                this.height=height;
+                this.color=color;
+                this.points=[
+                    [x,y],
+                    [this.x,this.y+this.height],
+                    [this.x+this.width,this.y+this.height],
+                    [this.x+this.width,this.y]
+                ];
+                this.on=false;
+            }
+
+            draw(){
+                ctx.beginPath();
+                ctx.fillStyle=this.color;
+                this.points.forEach((p,index)=>{
+                    if(index===0){
+                        ctx.moveTo(p[0],p[1])
+                    }
+                    else{
+                        ctx.lineTo(p[0],p[1]);
+                    }
+                })
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            drawFragment(){
+
+            }
+
+            mouseOn(ex,ey){
+                this.draw();
+                return ctx.isPointInPath(ex,ey);
+            }
+
+        }
+
+
+        class Control{
+            constructor(){
+                this.isMouseDown=false;
+                this.points=[];
+                this.downPoint=[];
+                this.upPoint=[];
+
+            }
+
+            ALRE(){ //线性回归方程
+                var AA=this.calA();
+
+                var a=AA[0], b=AA[2]-a*AA[1];
+
+                console.log('y='+a+"x+"+b);
+
+                return function(c){
+                    if(c==='x'){
+                        return function(x){
+                            return a*x+b;
+                        }
+                    }
+                    if(c==='y'){
+                        return function(y){
+                            return (y-b)/a;
+                        }
+                    }
+                }
+
+            }
+
+            calA(){ //线性回归方程 求B
+                var a1=0,
+                    a2=0,
+                    a3=0,
+                    a4=0,
+                    n=this.points.length;
+                this.points.forEach(function(point){
+                    a1+=point[0]; //x
+                    a2+=point[1]; //y
+                })
+
+                var avgX=a1/n,avgY=a2/n;
+                this.points.forEach(function(point){
+                    a3+=(point[0]-avgX)*(point[0]-avgX);
+                    a4+=(point[0]-avgX)*(point[1]-avgY);
+                })
+                var A=a4/a3;
+
+                return [A,avgX,avgY];
+            }
+
+//            addPoint(point){
+//                if(this.points.length<5){
+//                    this.points.push(point)
+//                }
+//            }
+
+        }
+
+
+        function run(){
+            var r=new Rect(300,300,100,200,'blue');
+            r.draw();
+            var ctrl = new Control();
+
+            cvs.addEventListener('mousedown',function(e){
+                ctrl.isMouseDown=true;
+                ctrl.downPoint=[e.layerX,e.layerY];
+            })
+
+            cvs.addEventListener('mousemove',function(e){
+                if(ctrl.isMouseDown){
+                    if(r.mouseOn(e.layerX,e.layerY)){
+                        ctrl.addPoint([parseInt(e.layerX),parseInt(e.layerY)]);
+                    }
+                    setTimeout(()=>drawLine(ctrl.downPoint[0],ctrl.downPoint[1],e.layerX,e.layerY),100)
+
+                }
+            })
+
+            cvs.addEventListener('mouseup',function(e){
+                ctrl.isMouseDown=false;
+                ctrl.points.splice(0,ctrl.points.length)
+            })
+        }
+
+        function drawLine(x1,y1,x2,y2){
+//            ctx.clearRect(0,0,cvsWidth,cvsHigh)
+            ctx.beginPath();
+            ctx.lineWidth=1;
+            ctx.strokeStyle='black';
+            ctx.moveTo(x1,y1);
+            ctx.lineTo(x2,y2);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+</script>
+</body>
+</html>

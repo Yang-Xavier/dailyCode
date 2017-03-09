@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cutter 2</title>
+    <style>
+        canvas{
+            /*border: 1px solid black;*/
+            /*border-bottom: 1px solid black;*/
+            /*box-shadow: 0 19px 500px #a1a156;*/
+        }
+    </style>
+</head>
+<body style="width:100%;padding: 0;margin: 0;left: 0;top: 0;background-color: #444444">
+<canvas id="cvs" width="1000px" height="500px" >
+
+</canvas>
+<script>
+    var cvsWidth=1000,cvsHigh=600;
+    var ctx,cvs;
+    window.onload=function(){
+        var clientWidth=document.body.clientWidth;
+        var clientHeight=window.screen.height||document.body.clientHeight;
+        cvs=document.getElementById('cvs');
+        cvsWidth=clientWidth;
+        cvsHigh=clientHeight;
+        cvs.setAttribute('width',cvsWidth+'');
+        cvs.setAttribute('height',cvsHigh+'');
+
+        ctx=cvs.getContext('2d');
+
+        run();
+    }
+
+
+    class Rect{
+        constructor(x,y,width,height,color){
+            this.x=x;
+            this.y=y;
+            this.width=width;
+            this.height=height;
+            this.color=color;
+            this.points=[
+                [x,y],
+                [this.x,this.y+this.height],
+                [this.x+this.width,this.y+this.height],
+                [this.x+this.width,this.y]
+            ];//逆时针
+
+            this.fragmentPoints=[];
+
+            this.crossPoints=[];
+            this.isMouseOn=false;
+        }
+
+        draw(array){
+            ctx.beginPath();
+            ctx.fillStyle=this.color;
+            ctx.strokeStyle='white';
+            ctx.lineWidth=5;
+            var array=array||this.points;
+            array.forEach((p,index)=>{
+                if(index===0){
+                    ctx.moveTo(p[0],p[1])
+                }
+                else{
+                    ctx.lineTo(p[0],p[1]);
+                }
+            });
+            ctx.lineTo(array[0][0],array[0][1]);
+            ctx.fill();
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        calCrossPoint(lineFun){
+            var py1=lineFun('x')(this.points[0][0]);//x1
+            var py2=lineFun('x')(this.points[2][0]);//x2
+
+            var px1=lineFun('y')(this.points[0][1]);//y1
+            var px2=lineFun('y')(this.points[2][1]);//y2
+
+            var fg,f1=[],f2=[],f3=[];
+
+            fg=this.points.slice(0,this.points.length)
+            if(py1>=this.points[0][1]&&py1<=this.points[2][1]){
+                if(py2>=this.points[0][1]&&py2<=this.points[2][1]){
+                    [f1,f2]=this.createAry(fg,1,3,[[this.points[0][0],py1],[this.points[2][0],py2]]);
+                    f3=[0,-1];
+                }else {
+                    if(px1>=this.points[0][0]&&px1<=this.points[2][0]){
+                        [f1,f2]=this.createAry(fg,1,4,[[this.points[0][0],py1],[px1,this.points[0][1]]])
+                        f3=[-1,-1]
+                    }
+                    if(px2>=this.points[0][0]&&px2<=this.points[2][0]){
+                        [f1,f2]=this.createAry(fg,1,2,[[this.points[0][0],py1],[px2,this.points[2][1]]])
+                        f3=[1,-1]
+                    }
+                }
+            }else if(py2>=this.points[0][1]&&py2<=this.points[2][1]){
+                if(px1>=this.points[0][0]&&px1<=this.points[2][0]){
+                    [f1,f2]=this.createAry(fg,3,4,[[this.points[2][0],py2],[px1,this.points[0][1]]])
+                    f3=[-1,1]
+                }
+                if(px2>=this.points[0][0]&&px2<=this.points[2][0]){
+                    [f1,f2]=this.createAry(fg,2,3,[[px2,this.points[2][1]],[this.points[2][0],py2]])
+                    f3=[-1,-1]
+                }
+            }else if(px1>=this.points[0][0]&&px1<=this.points[2][0]&&px2>=this.points[0][0]&&px2<=this.points[2][0]){
+                [f1,f2]=this.createAry(fg,2,4,[[px2,this.points[2][1]],[px1,this.points[0][1]]])
+                f3=[-1,0]
+            }
+
+//            console.log(this.points)
+//            console.log(f1)
+//            console.log(f2)
+
+            return [f1,f2,f3];
+        }
+
+        createAry(fg,a,b,c){
+            var f1=[],f2=[],arr=[];
+//            console.log(c)
+
+            arr=fg.slice(0,a);
+            arr.push(c[0]);
+            arr.push(c[1]);
+            f1=arr.concat(fg.slice(b)).slice(0);
+            arr=[];
+
+
+            arr.push(c[0])
+            arr=arr.concat(fg.slice(a,b));
+            arr.push(c[1])
+            f2=arr.slice(0)
+
+//            console.log(f1)
+//            console.log(f2)
+            return [f1,f2];
+        }
+
+
+        mouseOn(sx,sy){
+            return function(ex,ey){
+                ctx.clearRect(0,0,cvsWidth,cvsHigh);
+                this.draw();
+//                drawLine(sx,sy,ex-3,ey-3)
+                return ctx.isPointInPath(ex,ey);
+            }
+
+
+        }
+
+    }
+
+
+    class Control{
+        constructor(){
+            this.isMouseDown=false;
+            this.mousePoints=[];
+            this.lineFun=null;
+        }
+
+
+        createFun(){
+            var [p1,p2]=[this.mousePoints[0],this.mousePoints[1]];
+            var a=(p1[1]-p2[1])/(p1[0]-p2[0]);
+            var b=p1[1]-a*p1[0];
+
+            return function(c){
+                if(c==='y'){
+                    return function(y){
+                        return (y-b)/a;
+                    }
+                }else{
+                    return function(x){
+                        return a*x+b;
+                    }
+                }
+            }
+        }
+    }
+
+
+    class Fragment{
+        constructor(array,dx,dy,max){
+            this.array=array;
+            this.dx=dx;
+            this.dy=dy;
+            this.max=max;
+            this.x=0;
+            this.y=0;
+            this.i=0;
+        }
+
+        draw(array){
+            ctx.beginPath();
+            ctx.fillStyle=this.color;
+            ctx.strokeStyle='white';
+            ctx.lineWidth=5;
+            var array=array||this.array;
+            array.forEach((p,index)=>{
+                if(index===0){
+                    ctx.moveTo(p[0]+this.x,p[1]+this.y)
+                }
+                else{
+                    ctx.lineTo(p[0]+this.x,p[1]+this.y);
+                }
+            });
+            ctx.lineTo(array[0][0]+this.x,array[0][1]+this.y);
+            ctx.fill();
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        move(){
+            if(this.i<=Math.abs(this.max)){
+                this.array.forEach((point)=>{
+                    this.x+=this.dx;
+                    this.y+=this.dy;
+                    this.i++;
+                })
+            } else return false;
+            return true;
+        }
+    }
+
+
+
+    function run(){
+        var r=new Rect(300,300,300,300,'blue');
+        r.draw();
+        var ctrl = new Control();
+        var mouseOn;
+
+        cvs.addEventListener('mousedown',function(e){
+            ctrl.isMouseDown=true;
+            ctrl.mousePoints.push([e.layerX,e.layerY])
+            mouseOn=r.mouseOn(e.layerX,e.layerY);
+            mouseOn=mouseOn.bind(r);
+
+        })
+
+        cvs.addEventListener('mousemove',function(e){
+
+            if(ctrl.isMouseDown){
+                if(mouseOn(e.layerX,e.layerY)){
+                    r.isMouseOn=true;
+                }else{
+                    if(r.isMouseOn){
+                        r.isMouseOn=false;
+                        ctrl.mousePoints.push([e.layerX,e.layerY])
+                    }
+                }
+            }
+        })
+
+        cvs.addEventListener('mouseup',function(e){
+            ctrl.isMouseDown=false;
+//            console.log(ctrl.mousePoints)
+//            ctrl.lineFun=ctrl.createFun();
+
+            var [f1,f2,s3]=r.calCrossPoint(ctrl.createFun());
+
+            var fa=new Fragment(f1,s3[0],s3[1],20);
+            var fb=new Fragment(f2,-s3[0],-s3[1],20);
+            ctx.clearRect(0,0,cvsWidth,cvsHigh);
+
+            fragmentMove();
+
+            function fragmentMove(){
+                ctx.clearRect(0,0,cvsWidth,cvsHigh);
+                fa.move();
+                fb.move();
+                fa.draw();
+                fb.draw();
+                requestAnimationFrame(fragmentMove);
+            }
+
+            ctrl.mousePoints.splice(0,ctrl.mousePoints.length)
+        })
+    }
+
+
+
+    function drawLine(x1,y1,x2,y2){
+//            ctx.clearRect(0,0,cvsWidth,cvsHigh)
+        ctx.beginPath();
+        ctx.lineWidth=5;
+        ctx.strokeStyle='white';
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2,y2);
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+</script>
+</body>
+</html>
