@@ -377,7 +377,7 @@
         }
 
         animate(){
-            this.r+=10;
+            this.r+=20;
             this.draw();
             return this.fade();
         }
@@ -386,7 +386,7 @@
             var reg=/[0-9]\.[0-9]+/
             var a=this.color.match(reg);
             a=parseFloat(a[0]);
-            a-=0.01;
+            a-=0.05;
             if(a<=0) return true;
             this.color=this.color.replace(reg,a+'');
 
